@@ -1,24 +1,7 @@
 from flask import Flask, request, jsonify
 import VoiceRecognition
 import FaceRecognition
-import os
 
-
-directories = os.listdir('VoiceRecognition')
-
-if 'speakers' not in directories:
-    os.mkdir('VoiceRecognition/speakers')
-
-if 'predict' not in directories:
-    os.mkdir('VoiceRecognition/predict')
-
-directories = os.listdir('FaceRecognition')
-
-if 'faces' not in directories:
-    os.mkdir('FaceRecognition/faces')
-
-if 'predict' not in directories:
-    os.mkdir('FaceRecognition/predict')
 
 app = Flask(__name__)
 
