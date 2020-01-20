@@ -61,7 +61,7 @@ class Speakers:
         """
         features = np.asarray(())
         
-        print(file)
+        print('GET FEATURES ' + file)
         rate, audio = read(self.source + file)
 
         mfcc = MFCC()

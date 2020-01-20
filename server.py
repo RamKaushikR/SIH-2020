@@ -4,6 +4,8 @@ from VoiceRecognition.speaker import Speakers
 from FaceRecognition.identify import Face_Identify
 from FaceRecognition.face import Face
 import os
+import sksound
+import time
 
 
 directories = os.listdir('VoiceRecognition')
@@ -26,7 +28,7 @@ app = Flask(__name__)
 
 @app.route('/findSpeaker', methods = ['GET', 'POST'])
 def findSpeaker():
-    #result = None
+    result = None
     file = request.files['audio_file']
     speaker = request.form['speaker']
     print(speaker)
@@ -50,13 +52,20 @@ def findSpeaker():
 def addSpeaker():
     file = request.files['audio_file']
     speaker = request.form['speaker']
-    
-    file.save('speakers/file.wav')
+
+    file.save('speakers/file.mp3')
+    file = sksound.sounds.Sound('speakers/file.mp3')
+    file.write_wav('speakers/file.wav')
+    print(os.listdir('speakers'))
+    if 'file.mp3' in os.listdir('speakers'):
+        os.remove('speakers/file.mp3')
+    print(os.listdir('speakers'))
     
     vr = Speakers()
     vr.add_speaker(speaker)
 
     r = {'result': 'Added Speaker'}
+    time.sleep(2)
     return jsonify(r)
 
 @app.route('/updateSpeaker', methods = ['GET', 'POST'])
