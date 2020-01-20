@@ -3,6 +3,7 @@ import os
 import pickle
 import face_recognition
 import warnings
+import cv2
 
 
 warnings.filterwarnings('ignore')
@@ -26,6 +27,11 @@ class Face:
         :name: The name of the person
         """
         files = os.listdir(self.source)[0]
+        """
+        img = cv2.imread(self.source + files)
+        img = cv2.resize(img, (256, 256), interpolation = cv2.INTER_CUBIC)
+        cv2.imwrite(self.source + files, img)
+        """
         
         image = face_recognition.load_image_file(self.source + files)
         image_encodings = face_recognition.face_encodings(image)[0]

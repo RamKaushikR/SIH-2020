@@ -4,12 +4,13 @@ import pickle
 import face_recognition
 import warnings
 import time
+import cv2
 
 
 warnings.filterwarnings('ignore')
 
 
-class Identify:
+class Face_Identify:
     """
     Creates an identify object, to identify a face from an image
     Parameters:
@@ -32,6 +33,12 @@ class Identify:
             print(file)
             count = 0
             found = False
+
+            """
+            img = cv2.imread(self.source + file)
+            img = cv2.resize(img, (256, 256), interpolation = cv2.INTER_CUBIC)
+            cv2.imwrite(self.source + file, img)
+            """
 
             file_image = face_recognition.load_image_file(self.source + file)
             file_encoding = face_recognition.face_encodings(file_image)[0]
@@ -56,5 +63,5 @@ class Identify:
 
 
 if __name__ == '__main__':
-    face = Identify()
+    face = Face_Identify()
     print(face.identify_face())

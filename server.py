@@ -1,19 +1,42 @@
 from flask import Flask, request, jsonify
-import VoiceRecognition
-import FaceRecognition
+from VoiceRecognition.identify import Voice_Identify
+from VoiceRecognition.speaker import Speakers
+from FaceRecognition.identify import Face_Identify
+from FaceRecognition.face import Face
+import os
 
+
+directories = os.listdir('VoiceRecognition')
+
+if 'speakers' not in directories:
+    os.mkdir('VoiceRecognition/speakers')
+
+if 'predict' not in directories:
+    os.mkdir('VoiceRecognition/predict')
+
+directories = os.listdir('FaceRecognition')
+
+if 'faces' not in directories:
+    os.mkdir('FaceRecognition/faces')
+
+if 'predict' not in directories:
+    os.mkdir('FaceRecognition/predict')
 
 app = Flask(__name__)
 
 @app.route('/findSpeaker', methods = ['GET', 'POST'])
 def findSpeaker():
-    file = request.files['filename']
-    speaker = requests.form['speaker']
+    #result = None
+    file = request.files['audio_file']
+    speaker = request.form['speaker']
+    print(speaker)
 
-    file.save('VoiceRecognition/predict/file.wav')
+    file.save('predict/file.wav')
+    print('Received file')
 
-    vr = VoiceRecognition.identify.Identify(source = 'predict/')
+    vr = Voice_Identify(source = 'predict/')
     result = vr.identify_speaker()
+    print(result)
     
     match = 0
     
@@ -25,20 +48,12 @@ def findSpeaker():
 
 @app.route('/addSpeaker', methods = ['GET', 'POST'])
 def addSpeaker():
-    file1 = request.files['filename1']
-    file2 = request.files['filename2']
-    file3 = request.files['filename3']
-    file4 = request.files['filename4']
-    file5 = request.files['filename5']
+    file = request.files['audio_file']
     speaker = request.form['speaker']
     
-    file1.save('VoiceRecognition/speakers/file1.wav')
-    file2.save('VoiceRecognition/speakers/file2.wav')
-    file3.save('VoiceRecognition/speakers/file3.wav')
-    file4.save('VoiceRecognition/speakers/file4.wav')
-    file5.save('VoiceRecognition/speakers/file5.wav')
+    file.save('speakers/file.wav')
     
-    vr = VoiceRecognition.speaker.Speakers()
+    vr = Speakers()
     vr.add_speaker(speaker)
 
     r = {'result': 'Added Speaker'}
@@ -46,12 +61,12 @@ def addSpeaker():
 
 @app.route('/updateSpeaker', methods = ['GET', 'POST'])
 def updateSpeaker():
-    file = request.files['filename']
+    file = request.files['audio_file']
     speaker = request.form['speaker']
     
-    file.save('VoiceRecognition/speakers/file1.wav')
+    file.save('speakers/file.wav')
     
-    vr = VoiceRecognition.speaker.Speakers()
+    vr = Speakers()
     vr.update_speaker(speaker)
 
     r = {'result': 'Updated Speaker'}
@@ -61,7 +76,7 @@ def updateSpeaker():
 def removeSpeaker():
     speaker = request.form['speaker']
     
-    vr = VoiceRecognition.speaker.Speakers()
+    vr = Speakers()
     vr.remove_speaker(speaker)
 
     r = {'result': 'Remove Speaker'}
@@ -70,13 +85,15 @@ def removeSpeaker():
 @app.route('/findFace', methods = ['GET','POST'])
 def findFace():
     #process the image here.. Need to get specification from KabishQ
-    img = request.files['image']
+    img = request.files['face_image']
     target = request.form['target']
     
-    img.save('FaceRecognition/predict/img.jpg')
+    img.save('predict/img.jpg')
+    print('Received File')
 
-    fr = FaceRecognition.identify.Identify(source = 'predict/')
+    fr = Face_Identify(source = 'predict/')
     result = fr.identify_face()
+    print(result)
     
     match = 0
     
@@ -88,12 +105,12 @@ def findFace():
 
 @app.route('/addFace', methods = ['GET', 'POST'])
 def addFace():
-    img = request.files['image']
+    img = request.files['face_image']
     target = request.form['target']
     
-    img.save('FaceRecognition/faces/img.jpg')
+    img.save('faces/img.jpg')
 
-    fr = FaceRecognition.face.Face()
+    fr = Face()
     fr.add_face(target)
 
     r = {'result': 'Added Face'}
@@ -101,23 +118,23 @@ def addFace():
 
 @app.route('/updateFace', methods = ['GET', 'POST'])
 def updateFace():
-    img = request.files['image']
+    img = request.files['face_image']
     target = request.form['target']
     
-    img.save('FaceRecognition/faces/img.jpg')
+    img.save('faces/img.jpg')
 
-    fr = FaceRecognition.face.Face()
+    fr = Face()
     fr.update_face(target)
 
     r = {'result': 'Updated Face'}
     return jsonify(r)
 
-@app.route('/deleteFace', methods = ['GET', 'POST'])
-def deleteFace():
+@app.route('/removeFace', methods = ['GET', 'POST'])
+def removeFace():
     target = request.form['target']
     
-    fr = FaceRecognition.face.Face()
-    fr.delete_face(target)
+    fr = Face()
+    fr.remove_face(target)
 
     r = {'result': 'Removed Face'}
     return jsonify(r)
