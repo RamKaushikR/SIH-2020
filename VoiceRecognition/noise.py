@@ -8,7 +8,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class Noise:
-    def __init__(self, source = 'speakers/', dest = 'speakers/'):
+    def __init__(self, source = 'speaker/', dest = 'speaker/'):
         """
         Modifies the audio file by adding random noise and modifying the frequency
         Parameters:
@@ -30,7 +30,7 @@ class Noise:
             data = audio.data
             rate = audio.rate
             
-            if self.count % 5 != 0:
+            if self.count % 3 != 0:
                 data = data + np.random.normal(0, 1, data.shape) * np.random.randint(30, 100)
                 _ = np.random.randint(70, 110) // 80
                 rate = rate * _

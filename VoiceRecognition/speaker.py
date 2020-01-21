@@ -67,8 +67,10 @@ class Speakers:
         mfcc = MFCC()
         mfcc_feature = mfcc.mfcc_features(audio, rate)
         features = mfcc_feature
-
-        os.remove(self.source + file)
+        try:
+            os.remove(self.source + file)
+        except:
+            pass
             
         return features
         
@@ -79,7 +81,7 @@ class Speakers:
         :name: The name of the speaker
         """
                 
-        gmm = GaussianMixture(n_components = 11, max_iter = 200, covariance_type = 'diag', n_init = 3)
+        gmm = GaussianMixture(n_components = 6, max_iter = 200, covariance_type = 'diag', n_init = 3)
         files = os.listdir(self.source)
         files.sort()
         

@@ -59,7 +59,7 @@ class Voice_Identify:
         self.speakers = list(self.gmm_model.keys())
     
         
-    def identify_speaker(self):
+    def identify_speaker(self, speaker):
         """
         Identifies a given speaker from an audio sample
         """
@@ -72,31 +72,49 @@ class Voice_Identify:
             mfcc = MFCC()
             mfcc_feature = mfcc.mfcc_features(audio, rate)
             log = np.zeros(len(self.models))
-            
+            def get_index(a,k):
+                p = 0
+                for i in range(len(a)):
+                     if(a[i]==k):
+                        return i
+                return -1
             for i in range(len(self.models)):
                 gmm = self.models[i]
                 score = np.array(gmm.score(mfcc_feature))
                 log[i] = score / len(mfcc_feature) #1 / (1 + math.exp(-1 * score / len(mfcc_feature)))
                 
             #log = preprocessing.scale(log)
-            #print(log)
-            _ = np.argmax(log)
+            print(log)
+            log1 = np.sort(-1*log)
+            max1 = -1*log1[0]
+            max2 = -1*log1[1]
+            #print(max1,max2)
+            max1index = get_index(log,max1)
+            max2index = get_index(log,max2)
+            #_ = np.argmax(log)
             os.remove(self.source + file)
 
+            if speaker == self.speakers[max1index] or speaker == self.speakers[max2index]:
+                return 1
+            return 0
+
+            """
             total = 0.0
             for i in log:
                 total += (log[_] - i) ** 2
             total = math.sqrt(total) * len(self.speakers)
+            
 
             print(self.speakers)
             print('Log: ', log)
             print('Total: ', total)
 
-            if total > 0.5:
+            if total > 0.05:
                 speaker = self.speakers[_]
                 return speaker#print('Speaker is ' + speaker + '\n')
             else:
                 return 'Not found'#print('Speaker not found\n')
+            """
 
 
 if __name__ == '__main__':

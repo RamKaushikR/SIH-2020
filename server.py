@@ -28,44 +28,65 @@ app = Flask(__name__)
 
 @app.route('/findSpeaker', methods = ['GET', 'POST'])
 def findSpeaker():
-    result = None
+    result = 0
     file = request.files['audio_file']
     speaker = request.form['speaker']
-    print(speaker)
+    print('Speaker to be identified is ' + speaker)
 
     file.save('predict/file.wav')
     print('Received file')
 
     vr = Voice_Identify(source = 'predict/')
-    result = vr.identify_speaker()
+    result = vr.identify_speaker(speaker)
     print(result)
-    
+    """    
     match = 0
     
     if result == speaker:
         match = 1
-
-    r = {'result': match}
+    """
+    r = {'result': result}
     return jsonify(r)
 
 @app.route('/addSpeaker', methods = ['GET', 'POST'])
 def addSpeaker():
-    file = request.files['audio_file']
+    file1 = request.files['audio_file1']
+    file2 = request.files['audio_file2']
+    file3 = request.files['audio_file3']
+    file4 = request.files['audio_file4']
+    file5 = request.files['audio_file5']
     speaker = request.form['speaker']
 
-    file.save('speakers/file.mp3')
-    file = sksound.sounds.Sound('speakers/file.mp3')
-    file.write_wav('speakers/file.wav')
-    print(os.listdir('speakers'))
-    if 'file.mp3' in os.listdir('speakers'):
-        os.remove('speakers/file.mp3')
-    print(os.listdir('speakers'))
+    file1.save('speakers/file1.mp3')
+    file2.save('speakers/file2.mp3')
+    file3.save('speakers/file3.mp3')
+    file4.save('speakers/file4.mp3')
+    file5.save('speakers/file5.mp3')
+
+    file1 = sksound.sounds.Sound('speakers/file1.mp3')
+    file1.write_wav('speakers/file1.wav')
+    file2 = sksound.sounds.Sound('speakers/file2.mp3')
+    file2.write_wav('speakers/file2.wav')
+    file3 = sksound.sounds.Sound('speakers/file3.mp3')
+    file3.write_wav('speakers/file3.wav')
+    file4 = sksound.sounds.Sound('speakers/file4.mp3')
+    file4.write_wav('speakers/file4.wav')
+    file5 = sksound.sounds.Sound('speakers/file5.mp3')
+    file5.write_wav('speakers/file5.wav')
+
+    try:
+        os.remove('speakers/file1.mp3')
+        os.remove('speakers/file2.mp3')
+        os.remove('speakers/file3.mp3')
+        os.remove('speakers/file4.mp3')
+        os.remove('speakers/file5.mp3')
+    except:
+        pass
     
     vr = Speakers()
     vr.add_speaker(speaker)
 
     r = {'result': 'Added Speaker'}
-    time.sleep(2)
     return jsonify(r)
 
 @app.route('/updateSpeaker', methods = ['GET', 'POST'])
