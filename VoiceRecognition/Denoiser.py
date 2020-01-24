@@ -20,7 +20,7 @@ class Denoiser:
         self.keep_fraction = keep_fraction
     def fftdenoise(self):
         """
-        The function transfroms the time domain signal to frequency domain and retains a fraction of  frequency                           specified.Returns the denoised time domain signal.
+        The function transfroms the time domain signal to a frequency domain and retains a fraction of  frequency                           specified.Returns the denoised time domain signal.
         Parameters:
         :exclude_fraction the fraction of frequency to be excluded 
         Return Value: return np.unit16 value of the time domain signal

@@ -70,7 +70,6 @@ class Voice_Identify:
             rate, audio = read(self.source + file)
             rmnoise = denoise(inData = audio.copy(), keep_fraction = 0.3)
             audio = rmnoise.fftdenoise()
-
             mfcc = MFCC()
             mfcc_feature = mfcc.mfcc_features(audio, rate)
             log = np.zeros(len(self.models))
