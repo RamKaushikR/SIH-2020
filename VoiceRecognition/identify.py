@@ -10,7 +10,7 @@ from sklearn.utils.extmath import softmax
 #from mfcc import MFCC
 import warnings
 import time
-
+from Denoiser import Denioser as denoise
 
 warnings.filterwarnings('ignore')
 
@@ -68,6 +68,8 @@ class Voice_Identify:
         for file in files:
             print(file)
             rate, audio = read(self.source + file)
+            rmnoise = denoise(inData = audio.copy(), keep_fraction = 0.3)
+            audio = rmnoise.fftdenoise()
 
             mfcc = MFCC()
             mfcc_feature = mfcc.mfcc_features(audio, rate)

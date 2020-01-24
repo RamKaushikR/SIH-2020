@@ -7,7 +7,7 @@ import pickle
 from scipy.io.wavfile import read
 from sklearn.mixture import GaussianMixture
 import warnings
-
+from Denoiser import Denoiser as denoise
 
 warnings.filterwarnings('ignore')
 
@@ -63,7 +63,8 @@ class Speakers:
         
         print('GET FEATURES ' + file)
         rate, audio = read(self.source + file)
-
+        rmnoise = denoise(inData = audio.copy(), keep_fraction = 0.3)
+        audio = rmnoise.fftdenoise()   
         mfcc = MFCC()
         mfcc_feature = mfcc.mfcc_features(audio, rate)
         features = mfcc_feature
