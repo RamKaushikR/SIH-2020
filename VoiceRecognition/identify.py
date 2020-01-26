@@ -13,7 +13,8 @@ import time
 
 
 warnings.filterwarnings('ignore')
-class Denoiser:
+
+class Denoise:
     """
     denoises the input voice signal using frequency component anlysis
     """
@@ -22,19 +23,22 @@ class Denoiser:
         self.keep_fraction = keep_fraction
     def fftdenoise(self):
         """
-        The function transfroms the time domain signal to a frequency domain and retains a fraction of  frequency                           specified.Returns the denoised time domain signal.
+        The function transfroms the time domain signal to a frequency domain and retains a fraction of  frequency                           		specified.Returns the denoised time domain signal.
         Parameters:
         :exclude_fraction the fraction of frequency to be excluded 
         Return Value: return np.unit16 value of the time domain signal
         """
-        s = sp.fft(self.data)
+        s = np.fft.fft(self.data)
         m = np.mean(s)
+
         exclude = 0.01
         im_fft2 = s.copy()
         r = len(im_fft2)
-        im_fft2[int(r*self.keep_fraction):int(r*(1-self.keep_fraction))] = 0
-        im_new = sp.ifft(im_fft2).real
+
+        im_fft2[int(r * self.keep_fraction): int(r * (1 - self.keep_fraction))] = 0
+        im_new = np.fft.ifft(im_fft2).real
         return np.int16(im_new)
+
 
 class MFCC:
     """
@@ -84,59 +88,66 @@ class Voice_Identify:
         """
         Identifies a given speaker from an audio sample
         """
-        files = os.listdir(self.source)
-        
-        for file in files:
-            print(file)
-            rate, audio = read(self.source + file)
-            rmnoise = denoise(inData = audio.copy(), keep_fraction = 0.3)
-            audio = rmnoise.fftdenoise()
-            mfcc = MFCC()
-            mfcc_feature = mfcc.mfcc_features(audio, rate)
-            log = np.zeros(len(self.models))
-            def get_index(a,k):
-                p = 0
-                for i in range(len(a)):
-                     if(a[i]==k):
-                        return i
-                return -1
-            for i in range(len(self.models)):
-                gmm = self.models[i]
-                score = np.array(gmm.score(mfcc_feature))
-                log[i] = score / len(mfcc_feature) #1 / (1 + math.exp(-1 * score / len(mfcc_feature)))
-                
-            #log = preprocessing.scale(log)
-            print(log)
-            log1 = np.sort(-1*log)
-            max1 = -1*log1[0]
-            max2 = -1*log1[1]
-            #print(max1,max2)
-            max1index = get_index(log,max1)
-            max2index = get_index(log,max2)
-            #_ = np.argmax(log)
-            os.remove(self.source + file)
+        try:
+            files = os.listdir(self.source)
 
-            if speaker == self.speakers[max1index] or speaker == self.speakers[max2index]:
-                return 1
-            return 0
+            for file in files:
+                print(file)
+                rate, audio = read(self.source + file)
+                denoise = Denoise(inData = audio.copy(), keep_fraction = 0.3)
+                audio = denoise.fftdenoise()
 
-            """
-            total = 0.0
-            for i in log:
-                total += (log[_] - i) ** 2
-            total = math.sqrt(total) * len(self.speakers)
+                mfcc = MFCC()
+                mfcc_feature = mfcc.mfcc_features(audio, rate)
+                log = np.zeros(len(self.models))
+
+                """
+                def get_index(a,k):
+                    p = 0
+                    for i in range(len(a)):
+                        if(a[i]==k):
+                            return i
+                    return -1
+                """
+                for i in range(len(self.models)):
+                    gmm = self.models[i]
+                    score = np.array(gmm.score(mfcc_feature))
+                    log[i] = score / len(mfcc_feature)
             
+                log = preprocessing.scale(log)
+                os.remove(self.source + file)
+                """
+                log1 = np.sort(-1*log)
+                max1 = -1*log1[0]
+                max2 = -1*log1[1]
+                #print(max1,max2)
+                max1index = get_index(log,max1)
+                max2index = get_index(log,max2)
 
-            print(self.speakers)
-            print('Log: ', log)
-            print('Total: ', total)
+                if speaker == self.speakers[max1index] or speaker == self.speakers[max2index]:
+                    return 1
+                return 0
+                """
+                _ = np.argmax(log)
+                speaker_ = self.speakers[_]
+                print('Log: ', log)
 
-            if total > 0.05:
-                speaker = self.speakers[_]
-                return speaker#print('Speaker is ' + speaker + '\n')
-            else:
-                return 'Not found'#print('Speaker not found\n')
-            """
+                """
+                total = 0.0
+                for i in log:
+                    total += (log[_] - i) ** 2
+                total = math.sqrt(total) * len(self.speakers)
+
+                print(self.speakers)
+                print('Total: ', total)
+                """
+
+                if log[_] > 1 and speaker == speaker_:
+                    return 1
+                return 0
+
+        except:
+            return 'Could not identify ' + speaker
 
 
 if __name__ == '__main__':

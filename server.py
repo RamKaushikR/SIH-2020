@@ -6,34 +6,36 @@ from FaceRecognition.face import Face
 import os
 import sksound
 import time
+import cv2
 
 
-directories = os.listdir('VoiceRecognition')
+directories = os.listdir('./')
 
 if 'speakers' not in directories:
-    os.mkdir('VoiceRecognition/speakers')
+    os.mkdir('speakers')
 
 if 'predict' not in directories:
-    os.mkdir('VoiceRecognition/predict')
-
-directories = os.listdir('FaceRecognition')
+    os.mkdir('predict')
 
 if 'faces' not in directories:
-    os.mkdir('FaceRecognition/faces')
-
-if 'predict' not in directories:
-    os.mkdir('FaceRecognition/predict')
+    os.mkdir('faces')
 
 app = Flask(__name__)
 
 @app.route('/findSpeaker', methods = ['GET', 'POST'])
 def findSpeaker():
     result = 0
+
     file = request.files['audio_file']
     speaker = request.form['speaker']
     print('Speaker to be identified is ' + speaker)
 
-    file.save('predict/file.wav')
+    file.save('predict/file.mp3')
+    #"""
+    file1 = sksound.sounds.Sound('predict/file.mp3')
+    file1.write_wav('predict/file.wav')
+    os.remove('predict/file.mp3')
+    #"""
     print('Received file')
 
     vr = Voice_Identify(source = 'predict/')
@@ -84,9 +86,9 @@ def addSpeaker():
         pass
     
     vr = Speakers()
-    vr.add_speaker(speaker)
+    result = vr.add_speaker(speaker)
 
-    r = {'result': 'Added Speaker'}
+    r = {'result': result}
     return jsonify(r)
 
 @app.route('/updateSpeaker', methods = ['GET', 'POST'])
@@ -97,9 +99,9 @@ def updateSpeaker():
     file.save('speakers/file.wav')
     
     vr = Speakers()
-    vr.update_speaker(speaker)
+    result = vr.update_speaker(speaker)
 
-    r = {'result': 'Updated Speaker'}
+    r = {'result': result}
     return jsonify(r)
 
 @app.route('/removeSpeaker', methods = ['GET', 'POST'])
@@ -107,9 +109,9 @@ def removeSpeaker():
     speaker = request.form['speaker']
     
     vr = Speakers()
-    vr.remove_speaker(speaker)
+    result = vr.remove_speaker(speaker)
 
-    r = {'result': 'Remove Speaker'}
+    r = {'result': result}
     return jsonify(r)
 
 @app.route('/findFace', methods = ['GET','POST'])
@@ -122,28 +124,23 @@ def findFace():
     print('Received File')
 
     fr = Face_Identify(source = 'predict/')
-    result = fr.identify_face()
-    print(result)
-    
-    match = 0
-    
-    if(result == target):
-        match = 1
+    result = fr.identify_face(target)
         
-    r = {'result':match}
+    r = {'result': result}
     return jsonify(r)
 
 @app.route('/addFace', methods = ['GET', 'POST'])
 def addFace():
+    result = 0
     img = request.files['face_image']
     target = request.form['target']
     
     img.save('faces/img.jpg')
 
     fr = Face()
-    fr.add_face(target)
+    result = fr.add_face(target)
 
-    r = {'result': 'Added Face'}
+    r = {'result': result}
     return jsonify(r)
 
 @app.route('/updateFace', methods = ['GET', 'POST'])
@@ -154,9 +151,9 @@ def updateFace():
     img.save('faces/img.jpg')
 
     fr = Face()
-    fr.update_face(target)
+    result = fr.update_face(target)
 
-    r = {'result': 'Updated Face'}
+    r = {'result': result}
     return jsonify(r)
 
 @app.route('/removeFace', methods = ['GET', 'POST'])
@@ -164,7 +161,7 @@ def removeFace():
     target = request.form['target']
     
     fr = Face()
-    fr.remove_face(target)
+    result = fr.remove_face(target)
 
-    r = {'result': 'Removed Face'}
+    r = {'result': result}
     return jsonify(r)

@@ -11,27 +11,30 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-class Denoiser:
+class Denoise:
     """
     denoises the input voice signal using frequency component anlysis
     """
-    def __init__(self, inData = None,keep_fraction = 0.3):
+    def __init__(self, inData = None, keep_fraction = 0.3):
         self.data = inData
         self.keep_fraction = keep_fraction
+
     def fftdenoise(self):
         """
-        The function transfroms the time domain signal to a frequency domain and retains a fraction of  frequency                           specified.Returns the denoised time domain signal.
+        The function transfroms the time domain signal to a frequency domain and retains a fraction of  frequency                           		specified.Returns the denoised time domain signal.
         Parameters:
         :exclude_fraction the fraction of frequency to be excluded 
-        Return Value: return np.unit16 value of the time domain signal
+        Return Value: return np.uint16 value of the time domain signal
         """
-        s = sp.fft(self.data)
+        s = np.fft.fft(self.data)
         m = np.mean(s)
+
         exclude = 0.01
-        im_fft2 = s.copy()
+        im_fft2 = s
         r = len(im_fft2)
-        im_fft2[int(r*self.keep_fraction):int(r*(1-self.keep_fraction))] = 0
-        im_new = sp.ifft(im_fft2).real
+
+        im_fft2[int(r * self.keep_fraction): int(r * (1 - self.keep_fraction))] = 0
+        im_new = np.fft.ifft(im_fft2).real
         return np.int16(im_new)
 
 class MFCC:
@@ -83,19 +86,16 @@ class Speakers:
         """
         features = np.asarray(())
         
-        print('GET FEATURES ' + file)
+
         rate, audio = read(self.source + file)
-        rmnoise = denoise(inData = audio.copy(), keep_fraction = 0.3)
-        audio = rmnoise.fftdenoise()  
+        denoise = Denoise(inData = audio, keep_fraction = 0.3)
+        audio = denoise.fftdenoise()
  
         mfcc = MFCC()
         mfcc_feature = mfcc.mfcc_features(audio, rate)
         features = mfcc_feature
-        try:
-            os.remove(self.source + file)
-        except:
-            pass
-            
+
+        os.remove(self.source + file)
         return features
         
     def add_speaker(self, name):
@@ -104,23 +104,27 @@ class Speakers:
         Parameters:
         :name: The name of the speaker
         """
-                
-        gmm = GaussianMixture(n_components = 6, max_iter = 200, covariance_type = 'diag', n_init = 3)
-        files = os.listdir(self.source)
-        files.sort()
+
+        try:
+            gmm = GaussianMixture(n_components = 10, max_iter = 200, covariance_type = 'diag', n_init = 3)
+            files = os.listdir(self.source)
+            files.sort()
         
-        for file in files:
-            self.features = self.get_features(file)
-            gmm.fit(self.features)
+            for file in files:
+                self.features = self.get_features(file)
+                gmm.fit(self.features)
 
-        if self.models in os.listdir('./'):
-            model = pickle.load(open(self.models, 'rb'))
-        else:
-            model = {}
+            if self.models in os.listdir('./'):
+                model = pickle.load(open(self.models, 'rb'))
+            else:
+                model = {}
 
-        model[name] = gmm
-        pickle.dump(model, open(self.models, 'wb'))
-        print('Model developed for ' + name)
+            model[name] = gmm
+            pickle.dump(model, open(self.models, 'wb'))
+            return 'Added ' + name
+
+        except:
+            return 'Could not add ' + name
             
     def update_speaker(self, name):#, components = False):
         """
@@ -129,20 +133,25 @@ class Speakers:
         :name: The name of the speaker
         :components: Boolean value to change the n_components of a speaker's voice model, default False
         """
-        file = os.listdir(self.source)[0]
-        self.features = self.get_features(file)
+
+        try:
+            file = os.listdir(self.source)[0]
+            self.features = self.get_features(file)
                 
-        model = pickle.load(open(self.models, 'rb'))
-        gmm = model[name]
+            model = pickle.load(open(self.models, 'rb'))
+            gmm = model[name]
 
-        #if components:
-        #    gmm.n_components += 1
+            #if components:
+            #    gmm.n_components += 1
 
-        gmm.fit(self.features)
-        
-        model[name] = gmm
-        pickle.dump(model, open(self.models, 'wb'))
-        print('Model updated for ' + name)
+            gmm.fit(self.features)
+    
+            model[name] = gmm
+            pickle.dump(model, open(self.models, 'wb'))
+            return 'Updated ' + name
+
+        except:
+            return 'Could not update ' + name
 
     def remove_speaker(self, name):
         """
@@ -150,12 +159,19 @@ class Speakers:
         Parameters:
         :name: The name of the speaker
         """
-        model = pickle.load(open(self.models, 'rb'))
-        _ = model.pop(name)
+        try:
+            model = pickle.load(open(self.models, 'rb'))
+            _ = model.pop(name)
+            print(model.keys())
 
-        print('Removed ' + name)
+            if len(model.keys()) == 0:
+                os.remove(self.models)
+            else:
+                pickle.dump(model, open(self.models, 'wb'))
+            return 'Removed ' + name
 
-        pickle.dump(model, open(self.models, 'wb'))
+        except:
+            return 'Could not remove ' + name
 
 
 if __name__ == '__main__':

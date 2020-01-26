@@ -26,26 +26,30 @@ class Face:
         Parameters:
         :name: The name of the person
         """
-        files = os.listdir(self.source)[0]
-        """
-        img = cv2.imread(self.source + files)
-        img = cv2.resize(img, (256, 256), interpolation = cv2.INTER_CUBIC)
-        cv2.imwrite(self.source + files, img)
-        """
-        
-        image = face_recognition.load_image_file(self.source + files)
-        image_encodings = face_recognition.face_encodings(image)[0]
+        try:
+            files = os.listdir(self.source)[0]
+            """
+            img = cv2.imread(self.source + files)
+            img = cv2.resize(img, (256, 256), interpolation = cv2.INTER_CUBIC)
+            cv2.imwrite(self.source + files, img)
+            """
 
-        if self.models in os.listdir('./'):
-            model = pickle.load(open(self.models, 'rb'))
-        else:
-            model = {}
+            image = face_recognition.load_image_file(self.source + files)
+            image_encodings = face_recognition.face_encodings(image)[0]
 
-        model[name] = image_encodings
-        pickle.dump(model, open(self.models, 'wb'))
-        print('Model developed for ' + name)
+            if self.models in os.listdir('./'):
+                model = pickle.load(open(self.models, 'rb'))
+            else:
+                model = {}
 
-        os.remove(self.source + files)
+            model[name] = image_encodings
+            pickle.dump(model, open(self.models, 'wb'))
+
+            os.remove(self.source + files)
+            return 'Added ' + name
+
+        except:
+            return 'Could not add ' + name
             
     def update_face(self, name):
         """
@@ -53,18 +57,22 @@ class Face:
         Parameters:
         :name: The name of the person
         """
-        files = os.listdir(self.source)[0]
+        try:
+            files = os.listdir(self.source)[0]
+    
+            image = face_recognition.load_image_file(self.source + files)
+            image_encodings = face_recognition.face_encodings(image)[0]
         
-        image = face_recognition.load_image_file(self.source + files)
-        image_encodings = face_recognition.face_encodings(image)[0]
-                
-        model = pickle.load(open(self.models, 'rb'))
-        model[name] = image_encodings
-        
-        pickle.dump(model, open(self.models, 'wb'))
-        print('Model updated for ' + name)
+            model = pickle.load(open(self.models, 'rb'))
+            model[name] = image_encodings
 
-        os.remove(self.source + files)
+            pickle.dump(model, open(self.models, 'wb'))
+
+            os.remove(self.source + files)
+            return 'Updated ' + name
+
+        except:
+            return 'Could not identify ' + name
 
     def remove_face(self, name):
         """
@@ -72,12 +80,18 @@ class Face:
         Parameters:
         :name: The name of the person
         """
-        model = pickle.load(open(self.models, 'rb'))
-        _ = model.pop(name)
+        try:
+            model = pickle.load(open(self.models, 'rb'))
+            _ = model.pop(name)
 
-        print('Removed ' + name)
+            if len(model.keys()) == 0:
+                os.remove(self.models)
+            else:
+                pickle.dump(model, open(self.models, 'wb'))
+            return 'Removed ' + name
 
-        pickle.dump(model, open(self.models, 'wb'))
+        except:
+            return 'Could not remove ' + name
 
 
 if __name__ == '__main__':

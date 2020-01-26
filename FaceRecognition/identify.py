@@ -23,45 +23,52 @@ class Face_Identify:
         self.models = np.array(list(self.face_model.values()))
         self.faces = list(self.face_model.keys())
         
-    def identify_face(self):
+    def identify_face(self, name):
         """
         Identifies a given face from an image
         """
-        files = os.listdir(self.source)
+        try:
+            files = os.listdir(self.source)
 
-        for file in files:
-            print(file)
-            count = 0
-            found = False
+            for file in files:
+                print(file)
+                count = 0
+                found = False
 
-            """
-            img = cv2.imread(self.source + file)
-            img = cv2.resize(img, (256, 256), interpolation = cv2.INTER_CUBIC)
-            cv2.imwrite(self.source + file, img)
-            """
+                """
+                img = cv2.imread(self.source + file)
+                img = cv2.resize(img, (256, 256), interpolation = cv2.INTER_CUBIC)
+                cv2.imwrite(self.source + file, img)
+                """
 
-            file_image = face_recognition.load_image_file(self.source + file)
-            file_encoding = face_recognition.face_encodings(file_image)[0]
+                file_image = face_recognition.load_image_file(self.source + file)
+                file_encoding = face_recognition.face_encodings(file_image)[0]
 
-            for i in range(len(self.models)):
-                face_encodings = self.models[i]
-                result = face_recognition.compare_faces([file_encoding], face_encodings)
+                for i in range(len(self.models)):
+                    face_encodings = self.models[i]
+                    result = face_recognition.compare_faces([file_encoding], face_encodings)
 
-                if result[0]:
-                    found = True
-                    break
+                    if result[0]:
+                        found = True
+                        break
 
-                count += 1
+                    count += 1
 
-            os.remove(self.source + file)
+                os.remove(self.source + file)
+                if count == len(self.models):
+                    face = 'Unidentified'
+                else:
+                    face = self.faces[count]
+                print(face)
 
-            if found:
-                face = self.faces[count]
-                return face#print('Face is ' + face)
-            else:
-                return 'Not found'#print('Face Not Found')
+                if found and face == name:
+                    return 1
+                return 0
+
+        except:
+            return 'Could not identify ' + name
 
 
 if __name__ == '__main__':
     face = Face_Identify()
-    print(face.identify_face())
+    face.identify_face()
