@@ -5,6 +5,9 @@ from FaceRecognition.identify import Face_Identify
 from FaceRecognition.face import Face
 from FaceDetector.detect import show, isFake
 import os
+import sksound
+import numpy as np
+import cv2
 
 
 directories = os.listdir('./')

@@ -113,7 +113,7 @@ class Voice_Identify:
                     gmm = self.models[i]
                     score = np.array(gmm.score(mfcc_feature))
                     log[i] = score / len(mfcc_feature)
-            
+
                 log = preprocessing.scale(log)
                 os.remove(self.source + file)
                 """
