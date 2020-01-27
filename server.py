@@ -3,11 +3,29 @@ from VoiceRecognition.identify import Voice_Identify
 from VoiceRecognition.speaker import Speakers
 from FaceRecognition.identify import Face_Identify
 from FaceRecognition.face import Face
+from keras.preprocessing.image import img_to_array
+from keras.models import load_model
 import os
 import sksound
 import time
+import numpy as np
 import cv2
+import imutils
+import pickle
+"""
+for fakeness detection
+"""
+protoPath = os.path.sep.join(["face_detector", "deploy.prototxt"])
+modelPath = os.path.sep.join(["face_detector", "res10_300x300_ssd_iter_140000.caffemodel"])
+net = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
 
+print("[INFO] loading liveness detector...")
+model = load_model("liveness.model")
+le = pickle.loads(open("le.pickle", "rb").read())
+
+"""
+all necessary models loaded
+"""
 
 directories = os.listdir('./')
 
