@@ -40,6 +40,59 @@ if 'faces' not in directories:
 
 app = Flask(__name__)
 
+
+@app.route('/isFake', methods = ['GET', 'POST'])
+def isFake():
+    img = request.files['face_image']
+    target = request.form['target']
+    
+    img.save('predict/img.jpg')
+    print('Received File for fake detection')
+    frame = cv2.imread('predict/img.jpg')
+    frame = imutils.resize(frame, width=600)
+    (h, w) = frame.shape[:2]
+    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+    net.setInput(blob)
+    detections = net.forward()
+    for i in range(0, detections.shape[2]):
+        # extract the confidence (i.e., probability) associated with the
+        # prediction
+        confidence = detections[0, 0, i, 2]
+
+        # filter out weak detections
+        if confidence > args["confidence"]:
+            # compute the (x, y)-coordinates of the bounding box for
+            # the face and extract the face ROI
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (startX, startY, endX, endY) = box.astype("int")
+            # ensure the detected bounding box does fall outside the
+            # dimensions of the frame
+            startX = max(0, startX)
+            startY = max(0, startY)
+            endX = min(w, endX)
+            endY = min(h, endY)
+            # extract the face ROI and then preproces it in the exac
+            # same manner as our training data
+            face = frame[startY:endY, startX:endX]
+            face = cv2.resize(face, (32, 32))
+            face = face.astype("float") / 255.0
+            face = img_to_array(face)
+            face = np.expand_dims(face, axis=0)
+
+            # pass the face ROI through the trained liveness detector
+            # model to determine if the face is "real" or "fake"
+            preds = model.predict(face)[0]
+            j = np.argmin(preds)
+            label = le.classes_[j]
+
+            # draw the label and bounding box on the frame
+            verdict = label.decode("utf-8")
+            if(verdict=='real'):
+                return 1
+            else:
+                return 0
+
+
 @app.route('/findSpeaker', methods = ['GET', 'POST'])
 def findSpeaker():
     result = 0
