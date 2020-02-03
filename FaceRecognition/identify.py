@@ -66,7 +66,7 @@ class Face_Identify:
                 return 0
 
         except:
-            return 'Could not identify ' + name
+            return -1
 
 
 if __name__ == '__main__':

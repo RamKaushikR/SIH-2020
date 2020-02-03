@@ -101,22 +101,22 @@ class Voice_Identify:
                 mfcc_feature = mfcc.mfcc_features(audio, rate)
                 log = np.zeros(len(self.models))
 
-                """
+                
                 def get_index(a,k):
                     p = 0
                     for i in range(len(a)):
                         if(a[i]==k):
                             return i
                     return -1
-                """
+                
                 for i in range(len(self.models)):
                     gmm = self.models[i]
                     score = np.array(gmm.score(mfcc_feature))
                     log[i] = score / len(mfcc_feature)
 
-                log = preprocessing.scale(log)
+                #log = preprocessing.scale(log)
                 os.remove(self.source + file)
-                """
+                print('Log: ', log)
                 log1 = np.sort(-1*log)
                 max1 = -1*log1[0]
                 max2 = -1*log1[1]
@@ -127,10 +127,12 @@ class Voice_Identify:
                 if speaker == self.speakers[max1index] or speaker == self.speakers[max2index]:
                     return 1
                 return 0
+                
                 """
                 _ = np.argmax(log)
                 speaker_ = self.speakers[_]
                 print('Log: ', log)
+                """
 
                 """
                 total = 0.0
@@ -141,13 +143,14 @@ class Voice_Identify:
                 print(self.speakers)
                 print('Total: ', total)
                 """
-
+                """
                 if log[_] > 1 and speaker == speaker_:
                     return 1
                 return 0
+                """
 
         except:
-            return 'Could not identify ' + speaker
+            return -1
 
 
 if __name__ == '__main__':

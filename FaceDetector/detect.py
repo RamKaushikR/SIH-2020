@@ -1,10 +1,10 @@
 from keras.preprocessing.image import img_to_array
 from keras.models import load_model
 import os
+import cv2
 import sksound
 import time
 import numpy as np
-import cv2
 import imutils
 import pickle
 import tensorflow as tf
@@ -13,7 +13,7 @@ for fakeness detection
 """
 
 def init():
-    model = load_model('liveness.model')
+    model = load_model('liveness.h5')
     model.compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
     graph = tf.get_default_graph()
     return model, graph
@@ -41,13 +41,15 @@ def isFake(path):
 
     frame = cv2.imread(path)
     frame = imutils.resize(frame, width = 600)
-    show(frame)
+    #show(frame)
 
     (h, w) = frame.shape[: 2]
 
     blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
     net.setInput(blob)
     detections = net.forward()
+
+    result = -1
 
     for i in range(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with the
@@ -69,8 +71,8 @@ def isFake(path):
             # extract the face ROI and then preproces it in the exac
             # same manner as our training data
             face = frame[startY: endY, startX: endX]
-            face = cv2.resize(face, (32, 32))
-            show(cv2.resize(face.copy(), (256, 256)))
+            face = cv2.resize(face, (64, 64))
+            #show(cv2.resize(face.copy(), (256, 256)))
             face = face.astype('float') / 255.0
             face = img_to_array(face)
             face = np.expand_dims(face, axis = 0)
@@ -79,12 +81,11 @@ def isFake(path):
             # model to determine if the face is 'real' or 'fake'
             with graph.as_default():
                 preds = model.predict(face)[0]
-                j = np.argmax(preds)
+                j = np.argmin(preds)
                 label = le.classes_[j]
 
                 # draw the label and bounding box on the frame
                 verdict = label.decode('utf-8')
                 if(verdict == 'real'):
-                    return 1
-                return -1
-    return -1
+                    result = 1
+    return result

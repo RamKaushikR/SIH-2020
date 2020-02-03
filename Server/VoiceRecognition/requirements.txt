@@ -1,0 +1,8 @@
+sudo apt-get install python3 python3-pip
+pip install numpy
+pip install scikit-learn
+pip install python-speech-features
+pip install scipy
+pip install pygame
+pip install scikit-sound
+
