@@ -33,22 +33,12 @@ def findSpeaker():
     print('Speaker to be identified is ' + speaker)
 
     file.save('predict/file.wav')
-    """
-    file1 = sksound.sounds.Sound('predict/file.mp3')
-    file1.write_wav('predict/file.wav')
-    os.remove('predict/file.mp3')
-    """
     print('Received file')
 
     vr = Voice_Identify(source = 'predict/')
     result = vr.identify_speaker(speaker)
     print(result)
-    """    
-    match = 0
-    
-    if result == speaker:
-        match = 1
-    """
+
     r = {'result': result}
     return jsonify(r)
 
@@ -66,28 +56,6 @@ def addSpeaker():
     file3.save('speakers/file3.wav')
     file4.save('speakers/file4.wav')
     file5.save('speakers/file5.wav')
-
-    """
-    file1 = sksound.sounds.Sound('speakers/file1.mp3')
-    file1.write_wav('speakers/file1.wav')
-    file2 = sksound.sounds.Sound('speakers/file2.mp3')
-    file2.write_wav('speakers/file2.wav')
-    file3 = sksound.sounds.Sound('speakers/file3.mp3')
-    file3.write_wav('speakers/file3.wav')
-    file4 = sksound.sounds.Sound('speakers/file4.mp3')
-    file4.write_wav('speakers/file4.wav')
-    file5 = sksound.sounds.Sound('speakers/file5.mp3')
-    file5.write_wav('speakers/file5.wav')
-
-    try:
-        os.remove('speakers/file1.mp3')
-        os.remove('speakers/file2.mp3')
-        os.remove('speakers/file3.mp3')
-        os.remove('speakers/file4.mp3')
-        os.remove('speakers/file5.mp3')
-    except:
-        pass
-    """
     
     vr = Speakers()
     result = vr.add_speaker(speaker)
@@ -132,7 +100,6 @@ def findFace():
 
     
     real = isFake('predict/img.jpg')
-    print('Hello')
 
     if real == -1:
         result = -1
