@@ -106,7 +106,7 @@ class Speakers:
         """
 
         try:
-            gmm = GaussianMixture(n_components = 6, max_iter = 200, covariance_type = 'diag', n_init = 3, warm_start = True)
+            gmm = GaussianMixture(n_components = 6, max_iter = 200, covariance_type = 'diag', warm_start = True)
             files = os.listdir(self.source)
             files.sort()
         
